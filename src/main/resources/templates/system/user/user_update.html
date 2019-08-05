@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>修改员工</title>
+
+<style type="text/css">
+label {  margin-bottom: 13px}
+</style>
+
+</head>
+<body>
+
+	<div class="modal-dialog modal-lg">
+		<div class="modal-content">
+			<div class="modal-header" style="height:40px">
+				<button type="button" class="close" data-dismiss="modal">
+					<span aria-hidden="true">&times;</span><span class="sr-only">Close</span>
+				</button>
+				<h3>修改账号信息</h3>
+
+			</div>
+			<div class="modal-body">
+			<form action="/users/update" id="updateForm" method="post"
+					class="form-horizontal m-t" role="form">
+					<input name="serial" id="serial" th:field="${user.serial}" type="hidden" >
+
+					<div class="form-group">
+						<div class="unit">
+							<label class="col-sm-2 control-label" style="text-align: right">登录名<font color="red">*</font></label>
+							<div class="col-sm-4">
+								<input name="loginName" id="loginName" th:field="${user.loginName}"
+									class="form-control valid" type="text" placeholder="用于登录系统" 
+									aria-required="true">
+							</div>
+						</div>
+						
+						<div class="unit">
+							<label class="col-sm-2 control-label" style="text-align: right">姓名 <font color="red">*</font></label>
+							<div class="col-sm-4"> 
+								<input type="text" class="form-control valid" id="userName" th:field="${user.userName}"
+									name="userName"  aria-required="true">
+							</div>
+						</div>
+						
+					</div>
+					
+					<div class="form-group">
+						<div class="unit">
+							<label class="col-sm-2 control-label" style="text-align: right">角色 <font color="red">*</font></label>
+							<div class="col-sm-4">
+								<select class="form-control m-b" name="roleId" id="roleId" >
+									<option value="">请选择角色</option>
+                                    <option th:selected="${user.roleId eq list.id}"  th:each="list : ${roles}" th:value="${list.id}" th:text="${list.name}"></option>
+                                </select>
+							</div>
+						</div>
+						
+					</div>
+					
+					
+				</form>
+			</div>
+
+			<div class="modal-footer">
+				<button type="button" class="btn btn-white" data-dismiss="modal">关闭</button>
+				<button type="button" class="btn btn-primary submit" id = "">保存</button>
+			</div>
+		</div>
+	</div>
+
+
+
+
+	<script>
+		//表单验证默认方法  需要具体样式可以自己修改
+		$.validator.setDefaults({
+			highlight : function(element) {
+				$(element).closest('.unit').removeClass('has-success')
+						.addClass('has-error');
+			},
+			success : function(element) {
+				element.closest('.unit').removeClass('has-error').addClass(
+						'has-success');
+			},
+			errorElement : "span",
+			errorPlacement : function(error, element) {
+				if (element.is(":radio") || element.is(":checkbox")) {
+					error.appendTo(element.parent().parent().parent());
+				} else {
+					error.appendTo(element.parent());
+				}
+			},
+			errorClass : "help-block m-b-none",
+			validClass : "help-block m-b-none"
+
+		});
+
+		//点击事件
+		$(".submit").click(function() {
+			doSubmit();
+		});
+		//表单验证方法    具体可以看js form-validate-demo.js
+		function validateForm() {
+			// validate signup form on keyup and submit
+			var icon = "<i class='fa fa-times-circle'></i> ";
+			return $("#updateForm").validate({
+				//下面规则可以自行配置
+				rules : {
+					userName : "required",
+					loginName : "required",
+					roleId : "required",
+					userName : {
+						required : true,
+						minlength : 2
+					},
+					loginName : {
+						required : true,
+						minlength : 2
+					}
+				},
+				messages : {
+					userName : icon + "请输入登录名",
+					loginName : icon + "请输入姓名",
+					userName : {
+						required : icon + "请输入登录名",
+						minlength : icon + "登录名必须两个字符以上"
+					},
+					loginName : {
+						required : icon + "请输入姓名",
+						minlength : icon + "姓名必须2个字符以上"
+					},
+					roleId : {
+						required : icon + "请选择角色",
+					}
+				}
+			}).form();
+		}
+
+            //表单提交方法
+            function doSubmit() {
+                var options = {
+                    success : function(result) {
+                        swal("提示", result.message, "success", {
+                            buttons: false,
+                            timer: 1500,
+                        });
+                        window.location.reload()
+                    },
+                    error : function(result) {
+                        swal("错误提示", result.responseJSON.message, "error");
+                    }
+                }
+
+			if (validateForm()) {
+				$("#updateForm").ajaxSubmit(options);
+			}
+		}
+	</script>
+
+
+</body>
+</html>
