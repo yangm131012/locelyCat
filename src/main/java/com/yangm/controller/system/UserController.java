@@ -49,7 +49,7 @@ public class UserController extends BaseController {
 	@ResponseBody
 	public String findUsersByCondition(User users) {
 		return userService.findUsersByCondition(users);
-	}//
+	}
 
 	// 跳转修改密码界面
 	@RequestMapping("/toChangePassword")
