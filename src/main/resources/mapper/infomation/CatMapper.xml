@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.yangm.dao.infomation.CatDao" >
+  <resultMap id="BaseResultMap" type="com.yangm.pojo.infomation.Cat" >
+      <id column="id" jdbcType="BIGINT" javaType="java.lang.Long" />
+      <result column="name" jdbcType="VARCHAR" javaType="java.lang.String" />
+      <result column="sex" jdbcType="VARCHAR" javaType="java.lang.String" />
+      <result column="age" jdbcType="VARCHAR" javaType="java.lang.String" />
+      <result column="color" jdbcType="VARCHAR" javaType="java.lang.String" />
+      <result column="type" jdbcType="VARCHAR" javaType="java.lang.String" />
+      <result column="remark" jdbcType="VARCHAR" javaType="java.lang.String" />
+      <result column="character" jdbcType="VARCHAR" javaType="java.lang.String" />
+      <result column="createTime" jdbcType="VARCHAR" javaType="java.lang.String" />
+      <association column="create_user" property="createUser"
+			select="com.yangm.dao.system.UserDao.getUserById" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, name, sex, age, color, type, remark, character,create_user,createTime
+  </sql>
+  <select id="findCatsByCondition" parameterType="com.yangm.pojo.infomation.Cat" resultMap="BaseResultMap">
+  		select 
+  		<include refid="Base_Column_List" />
+	    from tb_cat a
+	   <where>
+ 	    	<if test = "name != null">
+		    	and a.NAME like CONCAT('%', #{name} ,'%')
+	    	</if>
+  			<if test = "sex != null">
+  			    and a.SEX like CONCAT('%', #{sex} ,'%')
+  			</if>
+  			<if test = "color != null">
+  			    and a.COLOR like CONCAT('%', #{color} ,'%')
+  			</if>
+	    </where>
+	   <if test="sortName!=null">
+			order by CONCAT( ${sortName}) ${sortOrder}
+		</if>
+  	</select>
+  
+</mapper>

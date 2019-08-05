@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.yangm.dao.system.PermissionDao" >
+  <resultMap id="BaseResultMap" type="com.yangm.pojo.system.Permission" >
+    <constructor >
+      <idArg column="id" jdbcType="INTEGER" javaType="java.lang.Integer" />
+      <arg column="parentId" jdbcType="INTEGER" javaType="java.lang.Integer" />
+      <arg column="name" jdbcType="VARCHAR" javaType="java.lang.String" />
+      <arg column="css" jdbcType="VARCHAR" javaType="java.lang.String" />
+      <arg column="href" jdbcType="VARCHAR" javaType="java.lang.String" />
+      <arg column="type" jdbcType="BIT" javaType="java.lang.Boolean" />
+      <arg column="permission" jdbcType="VARCHAR" javaType="java.lang.String" />
+      <arg column="sort" jdbcType="INTEGER" javaType="java.lang.Integer" />
+    </constructor>
+     <!-- <result column="id" property="id"/>
+      <result column="name" property="name"/>
+      <result column="css" property="css"/>
+      <result column="href" property="href"/>
+      <result column="type" property="type"/>
+      <result column="permission" property="permission"/>
+      <result column="sort" property="sort"/>
+    <association property="parentId" column="parentId" select="com.ls.dao.system.PermissionDao.selectById" />-->
+  </resultMap>
+  
+  <resultMap id="ResultMap" type="com.yangm.pojo.system.Permission" >
+    <result column="id" property="id"/>
+    <result column="name" property="name"/>
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, parentId, name, css, href, type, permission, sort
+  </sql>
+  <!--<select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select
+    <include refid="Base_Column_List" />
+    from sys_permission
+    where id = #{id,jdbcType=INTEGER}
+  </select>-->
+
+  <!--<select id="listAll" resultMap="BaseResultMap">
+    select * from
+    sys_permission t
+    order by t.sort
+  </select>-->
+
+  <select id="selectParent" parameterType="long" resultMap="ResultMap">
+    select a.id, a.name
+    from sys_permission a
+    where id = #{id}
+  </select>
+
+  <select id="queryLastSort" resultType="int">
+    select ifnull(
+      (select sort
+        from sys_permission a
+        where type = 1
+        order by sort desc
+        limit 1),
+    0)
+  </select>
+  <!--<delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    delete from sys_permission
+    where id = #{id,jdbcType=INTEGER}
+  </delete>-->
+  <!--<insert id="insert" parameterType="com.ls.pojo.xxx.Permission" >
+    insert into sys_permission (id, parentId, name, 
+      css, href, type, permission, 
+      sort)
+    values (#{id,jdbcType=INTEGER}, #{parentid.id}, #{name,jdbcType=VARCHAR},
+      #{css,jdbcType=VARCHAR}, #{href,jdbcType=VARCHAR}, #{type,jdbcType=BIT}, #{permission,jdbcType=VARCHAR}, 
+      #{sort,jdbcType=INTEGER})
+  </insert>
+  <insert id="insertSelective" parameterType="com.ls.pojo.xxx.Permission" >
+    insert into sys_permission
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="parentid != null" >
+        parentId,
+      </if>
+      <if test="name != null" >
+        name,
+      </if>
+      <if test="css != null" >
+        css,
+      </if>
+      <if test="href != null" >
+        href,
+      </if>
+      <if test="type != null" >
+        type,
+      </if>
+      <if test="permission != null" >
+        permission,
+      </if>
+      <if test="sort != null" >
+        sort,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="parentid != null" >
+        #{parentid,jdbcType=INTEGER},
+      </if>
+      <if test="name != null" >
+        #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="css != null" >
+        #{css,jdbcType=VARCHAR},
+      </if>
+      <if test="href != null" >
+        #{href,jdbcType=VARCHAR},
+      </if>
+      <if test="type != null" >
+        #{type,jdbcType=BIT},
+      </if>
+      <if test="permission != null" >
+        #{permission,jdbcType=VARCHAR},
+      </if>
+      <if test="sort != null" >
+        #{sort,jdbcType=INTEGER},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.ls.pojo.xxx.Permission" >
+    update sys_permission
+    <set >
+      <if test="parentid != null" >
+        parentId = #{parentid,jdbcType=INTEGER},
+      </if>
+      <if test="name != null" >
+        name = #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="css != null" >
+        css = #{css,jdbcType=VARCHAR},
+      </if>
+      <if test="href != null" >
+        href = #{href,jdbcType=VARCHAR},
+      </if>
+      <if test="type != null" >
+        type = #{type,jdbcType=BIT},
+      </if>
+      <if test="permission != null" >
+        permission = #{permission,jdbcType=VARCHAR},
+      </if>
+      <if test="sort != null" >
+        sort = #{sort,jdbcType=INTEGER},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.ls.pojo.xxx.Permission" >
+    update sys_permission
+    set parentId = #{parentid,jdbcType=INTEGER},
+      name = #{name,jdbcType=VARCHAR},
+      css = #{css,jdbcType=VARCHAR},
+      href = #{href,jdbcType=VARCHAR},
+      type = #{type,jdbcType=BIT},
+      permission = #{permission,jdbcType=VARCHAR},
+      sort = #{sort,jdbcType=INTEGER}
+    where id = #{id,jdbcType=INTEGER}
+  </update>-->
+</mapper>

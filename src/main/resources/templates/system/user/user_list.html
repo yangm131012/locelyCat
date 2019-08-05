@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" 
+	xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+
+<head>
+
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+
+<title>猫咪信息管理云平台</title>
+<meta name="keywords" content="猫咪信息管理云平台">
+<meta name="description"
+	content="猫咪信息管理云平台">
+
+<link rel="shortcut icon" href="favicon.ico">
+<link href="../css/bootstrap.min.css-v=3.3.6.css" rel="stylesheet">
+<link href="../css/font-awesome.css-v=4.4.0.css" rel="stylesheet">
+
+<!-- Sweet Alert -->
+<link href="../css/plugins/sweetalert/sweetalert.css" rel="stylesheet">
+	
+<link href="../css/plugins/bootstrap-table/bootstrap-table.min.css" rel="stylesheet">
+<link href="../css/animate.css" rel="stylesheet">
+<link href="../css/style.css-v=4.1.0.css" rel="stylesheet">
+
+</head>
+
+<body class="gray-bg">
+	<div class="row  border-bottom white-bg dashboard-header">
+		<div class="row">
+			<div class="col-sm-12">
+				<div class="ibox float-e-margins">
+					<div class="ibox-title">
+						<h5>账号列表</h5>
+						<div class="ibox-tools">
+							<a href="javascript:void(0);" class="btn btn-primary btn-sm"
+								onclick="toSaveUser()"><i class="glyphicon glyphicon-plus"></i>
+								新增</a>
+						</div>
+					</div>
+					<div class="ibox-content">
+						<div class="row m-b-sm m-t-sm">
+							<div class="col-sm-1">
+								<button type="button" id="loading-example-btn"
+									class="btn btn-info  btn-sm" onclick="flushEmployee()">
+									<i class="fa fa-refresh"></i> 刷新
+								</button>
+							</div>
+
+							<form action="/employee/findEmployeeList">
+								<div class="col-sm-2">
+									<div>
+										<input type="text" placeholder="请输入姓名" id="userName" 
+											class="input-sm form-control">
+									</div>
+								</div>
+								<div class="col-sm-2">
+									<div>
+
+										<input type="text" placeholder="请输入登录名"
+											class="input-sm form-control" id="loginName">
+									</div>
+								</div>
+
+								<div class="col-sm-1">
+									<button type="button" id="submit"
+										class="btn btn-info  btn-sm">
+										<i class="glyphicon glyphicon-search"></i>搜索
+									</button>
+								</div>
+							</form>
+						</div>
+
+						<div class="project-list">
+
+
+							<table id="dataGrid" class="table table-striped table-bordered table-condensed">
+							</table>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+	</div>
+	
+	<!-- 模态框 -->
+	<div class="modal inmodal fade" id="toSaveUser" tabindex="-1"
+		role="dialog" aria-hidden="true"></div>
+
+	<div class="modal inmodal fade" id="userDetail" tabindex="-1"
+		role="dialog" aria-hidden="true"></div>
+
+	<div class="modal inmodal fade" id="updateEmployee" tabindex="-1"
+		role="dialog" aria-hidden="true"></div>
+
+	<div class="modal inmodal fade" id="setCompanyCustomer" tabindex="-1"
+		role="dialog" aria-hidden="true"></div>
+
+
+	<!-- 全局js -->
+	<script src="../js/jquery.min.js-v=2.1.4"></script>
+	<script src="../js/bootstrap.min.js-v=3.3.6"></script>
+	<script src="../js/jquery.form.js"></script>
+
+	<script src="../js/plugins/jeditable/jquery.jeditable.js"></script>
+	
+	<!-- Data Tables -->
+    <script src="../js/plugins/dataTables/jquery.dataTables.js"></script>
+    <script src="../js/plugins/dataTables/dataTables.bootstrap.js"></script>
+	
+    <!-- Bootstrap table -->
+    <script src="../js/plugins/bootstrap-table/bootstrap-table.min.js"></script>
+    <script src="../js/plugins/bootstrap-table/bootstrap-table-mobile.min.js"></script>
+    <script src="../js/plugins/bootstrap-table/locale/bootstrap-table-zh-CN.min.js"></script>
+    
+    <!-- jQuery Validation plugin javascript -->
+    <script src="../js/plugins/validate/jquery.validate.min.js"></script>
+    <script src="../js/plugins/validate/messages_zh.min.js"></script>
+    
+	<!-- 自定义js -->
+	<script src="../js/content.js"></script>
+
+	<!-- Sweet alert -->
+	<script src="../js/plugins/sweetalert/sweetalert.min.js"></script>
+	<script src="../js/permission.js"></script>
+
+
+	<!-- Page-Level Scripts -->
+	<!-- th:inline="javascript"  加上这个标签  js里面可以取到后台传来的值 -->
+	<script th:inline="javascript">
+	var pers;
+		$(document).ready(function() {
+			// 查询按钮是否有权限
+			pers = checkPermission();
+			
+			initDataGrid();
+			
+			$("#submit").bind("click",initDataGrid);
+		});
+		function initDataGrid() {
+			//销毁表格
+			$('#dataGrid').bootstrapTable('destroy');
+			//创建bootstrapTable
+			$("#dataGrid").bootstrapTable({
+				method:"POST",
+				//极为重要，缺失无法执行queryParams，传递page参数
+				contentType : "application/x-www-form-urlencoded",
+				dataType:"json",
+				url:'/users/findUsersByCondition', 
+				queryParams:queryParam,
+				pagination:true,//显示分页条：页码，条数等
+				striped:true,//隔行变色
+				sortable: true, //启用排序
+				sortOrder: "asc",  //排序方式
+				
+				pageNumber:1,//首页页码
+				pageSize:10,//分页，页面数据条数
+				uniqueId:"id",//Indicate an unique identifier for each row
+				sidePagination:"server",//在服务器分页
+
+				columns : [
+					{
+					title : "序号",
+					field : "serial",
+					align : 'center',
+			        formatter : function (value, row, index) {
+			            var pageSize = $('#dataGrid').bootstrapTable('getOptions').pageSize;     //通过table的#id 得到每页多少条
+			            var pageNumber = $('#dataGrid').bootstrapTable('getOptions').pageNumber; //通过table的#id 得到当前第几页
+			            return pageSize * (pageNumber - 1) + index + 1;    // 返回每条的序号： 每页条数 *（当前页 - 1 ）+ 序号
+			        },
+			        width: '5%'
+				}, {
+					title : "姓名",
+					field : "userName",
+                    align : 'center',
+					width: '10%'
+				}, {
+					title : "登录名",
+					field : "loginName",
+                    align : 'center',
+					width: '10%'
+				},{
+					title : "账号状态",
+					field : "status",
+					align : 'center',
+					width: '5%',
+                    formatter : function (value, row, index) {
+                        if (value == 0) {
+							return "未启用";
+						}else if(value == 1){
+							return "已启用";
+						}else if(value == 2){
+							return "已停用";
+						}else if(value == 3){
+							return "已删除";
+						}
+                        
+                    },
+				}, {
+					title : "注册时间",
+					field : "createTime",
+					align : 'center',
+					width: '15%',
+                    formatter : function (value, row, index) {
+                        if (value == undefined) {
+							return "";
+						}
+						return createFormatTimeStr(value);
+                    },
+				}, {
+		            field: 'operate',
+		            title: '操作',
+		            width: '25%',
+		            align : 'center',
+		            formatter: operateFormatter
+		        },],
+			});
+		}
+		
+		function operateFormatter(value, row, index) {
+			var resultPermission = '';
+			
+			resultPermission += '<button class="btn btn-success btn-sm" onclick="findUserById('+row.serial+')"><i class="fa fa-paste"></i> 查看</button>&nbsp;&nbsp;&nbsp;';
+			resultPermission += '<button class="btn btn-warning btn-sm" onclick="updateEmployee('+row.serial+')" type="button"> <i class="glyphicon glyphicon-pencil"></i> 编辑</button>&nbsp;&nbsp;&nbsp;';
+			resultPermission += '<button class="btn btn-danger btn-sm" onclick="delteEmployee('+row.serial+')" type="button"> <i class="glyphicon glyphicon-trash"></i> 删除</button>&nbsp;&nbsp;&nbsp;'; 
+			resultPermission += '<button class="btn btn-warning btn-sm" onclick="resetPassword('+row.serial+')" type="button"> <i class="fa fa-history"></i> 重置密码</button>&nbsp;&nbsp;&nbsp;';
+			if(row.status==0 || row.status==2 || row.status==3){
+				resultPermission += '<button class="btn btn-info btn-sm" onclick="enable('+row.serial+')" type="button"> <i class="glyphicon glyphicon-ok"></i> 启用</button>&nbsp;&nbsp;&nbsp;';
+			}else if(row.status==1){
+				resultPermission += '<button class="btn btn-info btn-sm" onclick="blockUp('+row.serial+')" type="button"> <i class="glyphicon glyphicon-remove"></i> 停用</button>&nbsp;&nbsp;&nbsp;';
+			}
+
+	        return [resultPermission].join('');
+		}
+
+		function queryParam(params){
+			if ($("#userName").val() == "" || $("#userName").val() ==null)
+			{
+				userName = "";
+			}
+			else
+			{
+				userName = $("#userName").val();
+			}
+			if ($("#loginName").val() == "" || $("#loginName").val() ==null)
+			{
+				loginName = "";
+			}
+			else
+			{
+				loginName = $("#loginName").val();
+			}
+	    	var param = {
+	    			limit : this.limit, // 页面大小
+	    	        offset : this.offset, // 页码
+	    	        pageNumber : this.pageNumber,
+	    	        pageSize : this.pageSize,
+	    	        sortName: params.sort,      //排序列名  
+                    sortOrder: this.sortOrder,
+                    userName: userName,
+                    loginName : loginName
+	    	};
+	    	
+	    	
+	    	return param;
+	    }
+
+		// 保存
+		function toSaveUser() {
+
+			$("#toSaveUser").load("/users/toSaveUser");
+			$('#toSaveUser').modal('show');
+		}
+
+		// 查看
+		function findUserById(serial) {
+			$("#userDetail").load(
+					"/users/findUserById?serial=" + serial);
+			$('#userDetail').modal('show');
+		}
+
+		// 更新
+		function updateEmployee(serial) {
+			$("#updateEmployee").load(
+                "/users/toUpdate?serial=" + serial);
+			$('#updateEmployee').modal('show');
+		}
+
+		// 删除
+		function delteEmployee(serial) {
+			swal({
+				title : "您确定要删除该账号吗",
+				text : "删除后该账号将无法登录系统，请谨慎操作！",
+				type : "warning",
+				showCancelButton : true,
+				cancelButtonText : "取消",
+				confirmButtonColor : "#DD6B55",
+				confirmButtonText : "删除",
+				closeOnConfirm : false
+			}, function() {
+				$.ajax({
+					type : "POST",
+					url : "/users/deleteUser",
+					data : {
+						serial : serial
+					},
+					dataType : "json",
+					success : function(result) {
+						if (result == 0) {
+							swal("删除失败！", "删除账号失败。", "fail");
+						} else {
+							swal("删除成功！", "删除账号成功。", "success");
+							window.location.reload();
+						}
+					}/* ,																														                    } */
+				});
+			});
+
+		}
+
+		// 重置密码
+		function resetPassword(serial) {
+			swal({
+				title : "您确定要重置密码吗",
+				text : '重置会将密码初始化为: 000000,请谨慎操作！',
+				type : "warning",
+				showCancelButton : true,
+				cancelButtonText : "取消",
+				confirmButtonColor : "#DD6B55",
+				confirmButtonText : "重置",
+				closeOnConfirm : false
+			}, function() {
+				$.ajax({
+					type : "POST",
+					url : "/users/resetPassword",
+					data : {
+						serial : serial
+					},
+					dataType : "json",
+					success : function(result) {
+						if (result == 0) {
+							swal("重置失败！", "重置密码失败。", "fail");
+						} else {
+							swal("重置成功！", "重置密码成功。", "success");
+							window.location.reload();
+						}
+					}/* ,																														                    } */
+				});
+			});
+
+		}
+		
+		// 启用账号
+		function enable(serial) {
+			swal({
+				title : "您确定要启用该账号吗",
+				text : "启用后该账号将可以登录系统，请谨慎操作！",
+				type : "warning",
+				showCancelButton : true,
+				cancelButtonText : "取消",
+				confirmButtonColor : "#DD6B55",
+				confirmButtonText : "启用",
+				closeOnConfirm : false
+			}, function() {
+				$.ajax({
+					type : "POST",
+					url : "/users/enableUser",
+					data : {
+						serial : serial
+					},
+					dataType : "json",
+					success : function(result) {
+						if (result == 0) {
+							swal("启用失败！", "启用账号失败。", "fail");
+						} else {
+							swal("启用成功！", "启用账号成功。", "success");
+							window.location.reload();
+						}
+					}/* ,																														                    } */
+				});
+			});
+
+		}
+		
+		// 停用账号
+		function blockUp(serial) {
+			swal({
+				title : "您确定要停用该账号吗",
+				text : "停用后该账号将无法登录系统，请谨慎操作！",
+				type : "warning",
+				showCancelButton : true,
+				cancelButtonText : "取消",
+				confirmButtonColor : "#DD6B55",
+				confirmButtonText : "停用",
+				closeOnConfirm : false
+			}, function() {
+				$.ajax({
+					type : "POST",
+					url : "/users/blockUpUser",
+					data : {
+						serial : serial
+					},
+					dataType : "json",
+					success : function(result) {
+						if (result == 0) {
+							swal("停用失败！", "停用账号失败。", "fail");
+						} else {
+							swal("停用成功！", "停用账号成功。", "success");
+							window.location.reload();
+						}
+					}/* ,																														                    } */
+				});
+			});
+
+		}
+		
+		//刷新页面
+		function flushEmployee() {
+			window.location.reload();
+		}
+		
+		
+	</script>
+
+
+</body>
+
+</html>

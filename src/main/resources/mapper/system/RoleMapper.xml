@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.yangm.dao.system.RoleDao">
+	<resultMap id="BaseResultMap" type="com.yangm.pojo.system.Role">
+		<result property="id" column="id"/>
+		<result property="name" column="name"/>
+		<result property="description" column="description"/>
+	</resultMap>
+
+	<sql id="Base_Column_List">
+		id, name, description
+	</sql>
+
+	<sql id="where">
+		<where>
+			<if test="params.name != null and params.name != ''">
+				and t.name like concat('%', #{params.name}, '%')
+			</if>
+		</where>
+	</sql>
+
+	<select id="count" resultType="int">
+		select count(1) from sys_role t
+		<include refid="where" />
+	</select>
+
+	<select id="list" resultType="com.yangm.pojo.system.Role">
+		select * from sys_role t
+		<include refid="where" />
+		${params.orderBy}
+        <if test="offset != null and offset >= 0 and limit != null and limit >= 0">
+            limit #{offset}, #{limit}
+        </if>
+	</select>
+
+	<select id="queryList" parameterType="com.yangm.pojo.system.Role" resultType="com.yangm.pojo.system.Role">
+		select
+		<include refid="Base_Column_List"/>
+		from sys_role
+		<where>
+			<if test="name != null and name != ''">
+				and name like concat('%', #{name}, '%')
+			</if>
+
+			<if test="description != null and description != ''">
+				and description like concat('%', #{description}, '%')
+			</if>
+		</where>
+	</select>
+
+	<select id="checkName" parameterType="string" resultType="int">
+		select count(1)
+		from sys_role
+		where name = #{name}
+	</select>
+
+	<select id="checkUpdateName" parameterType="com.yangm.pojo.system.Role" resultType="int">
+		select count(1)
+		from sys_role
+		where name = #{name} and id != ${id}
+	</select>
+
+	<insert id="saveRolePermission">
+		insert into sys_role_permission(roleId, permissionId) values
+		<foreach collection="permissionIds" item="permissionId"
+			separator=",">
+			(#{roleId}, #{permissionId})
+		</foreach>
+	</insert>
+
+</mapper>

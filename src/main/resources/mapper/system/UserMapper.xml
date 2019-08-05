@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.yangm.dao.system.UserDao">
+
+    <resultMap id="userMap" type="com.yangm.pojo.system.User">
+        <id column="SERIAL" property="serial" />
+		<result column="USER_TYPE" property="userType" />
+		<result column="USER_NAME" property="userName" />
+		<result column="COMPANY_NAME" property="companyName" />
+		<result column="LOGIN_NAME" property="loginName" />
+		<result column="PASSWORD" property="password" />
+		<result column="SALT" property="salt" />
+		<result column="MAIL" property="mail" />
+		<result column="PHONE_NUMBER" property="phoneNumber" />
+		<result column="COMPANY_INTRODUCE" property="companyIntroduce" />
+		<result column="ADDRESS" property="address" />
+		<result column="PHONE" property="phone" />
+		<result column="STATUS" property="status" />
+		<result column="CREATE_TIME" property="createTime" />
+     </resultMap>
+
+  		<sql id="Base_Column_List">
+		SERIAL, USER_TYPE, USER_NAME, COMPANY_NAME, LOGIN_NAME,
+		PASSWORD, SALT, MAIL, PHONE_NUMBER, COMPANY_INTRODUCE, ADDRESS, PHONE, STATUS, CREATE_TIME
+	</sql>
+	
+	<select id="findUserByCondition" parameterType="com.yangm.pojo.system.User" resultMap="userMap">
+		select
+		<include refid="Base_Column_List" />
+		from sys_user 
+		<where>
+			<if test="userType != null and userType != '' ">
+				and USER_TYPE = #{userType} 
+			</if>
+			<if test="userName != null and userName != '' ">
+				and USER_NAME like CONCAT('%', #{userName} ,'%')
+			</if>
+			<if test="loginName != null and loginName != '' ">
+				and LOGIN_NAME like CONCAT('%', #{loginName} ,'%')
+			</if>
+			<if test="phoneNumber != null and phoneNumber != '' ">
+				and PHONE_NUMBER like CONCAT('%', #{phoneNumber} ,'%')
+			</if>
+			<if test="companyName != null and companyName != '' ">
+				and COMPANY_NAME like CONCAT('%', #{companyName} ,'%')
+			</if>
+		</where>
+		<if test="sortName!=null">
+			order by CONCAT( ${sortName}) ${sortOrder}
+		</if>
+	</select>
+	
+	<insert id="saveUser" useGeneratedKeys="true" keyProperty="serial" parameterType="com.yangm.pojo.system.User">
+		insert
+		into
+		sys_user (SERIAL,
+		USER_TYPE, USER_NAME, COMPANY_NAME, LOGIN_NAME,
+		PASSWORD, SALT, MAIL,
+		PHONE_NUMBER, COMPANY_INTRODUCE, ADDRESS, PHONE, STATUS, CREATE_TIME)
+		values
+		(#{serial},
+		#{userType}, #{userName}, #{companyName}, #{loginName},
+		#{password},
+		#{salt}, #{mail}, #{phoneNumber}, #{companyIntroduce},
+		#{address},
+		#{phone}, #{status}, #{createTime})
+	</insert>
+
+	<update id="updateUser" parameterType="com.yangm.pojo.system.User">
+		update sys_user
+		<trim prefix="SET" suffixOverrides=",">
+			<if test="userType != null">USER_TYPE = #{userType},</if>
+			<if test="userName != null">USER_NAME = #{userName},</if>
+			<if test="companyName != null">COMPANY_NAME = #{companyName},</if>
+			<if test="loginName != null">LOGIN_NAME = #{loginName},</if>
+			<if test="password != null">PASSWORD = #{password},</if>
+			<if test="salt != null">SALT = #{salt},</if>
+			<if test="mail != null">MAIL = #{mail},</if>
+			<if test="phoneNumber != null">PHONE_NUMBER = #{phoneNumber},</if>
+			<if test="companyIntroduce != null">COMPANY_INTRODUCE = #{companyIntroduce},</if>
+			<if test="address != null">ADDRESS = #{address},</if>
+			<if test="phone != null">PHONE = #{phone},</if>
+			<if test="status != null">STATUS = #{status},</if>
+			<if test="createTime != null">CREATE_TIME = #{createTime},</if>
+		</trim>
+		where SERIAL = #{serial}
+	</update>
+
+	<delete id="deleteUserById" parameterType="java.lang.Long">
+		DELETE FROM
+		sys_user
+		WHERE
+		SERIAL = #{serial}
+	</delete>
+
+	<select id="getUserById" parameterType="java.lang.Long" resultMap="userMap">
+		select
+		<include refid="Base_Column_List" />
+		from sys_user 
+		where SERIAL = #{serial}
+	</select>
+
+	<select id="getUserByLoginName" parameterType="java.lang.String" resultMap="userMap">
+		select
+		<include refid="Base_Column_List" />
+		from sys_user 
+		where LOGIN_NAME = #{loginName}
+	</select>
+	
+	<select id="getUserByUserName" parameterType="java.lang.String" resultMap="userMap">
+		select
+		<include refid="Base_Column_List" />
+		from sys_user 
+		where USER_NAME = #{userName}
+	</select>
+	
+	<select id="checkLoginName" parameterType="map" resultMap="userMap">
+		select 
+		<include refid="Base_Column_List" />
+		from sys_user 
+		where t.SERIAL != #{serial}
+		and
+		t.LOGIN_NAME = #{loginName}
+	</select>
+	
+	<insert id="saveUserRole">
+		insert into sys_role_user(roleId, userId) values (#{roleId}, #{userId})
+	</insert>
+
+	<delete id="deleteUserRole" parameterType="java.lang.Long">
+		DELETE FROM
+		sys_role_user
+		WHERE
+		userId = #{serial}
+	</delete>
+</mapper>
